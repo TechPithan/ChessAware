@@ -1,0 +1,277 @@
+"use client";
+import React, { useState } from "react";
+
+const FetchGamesPage: React.FC = () => {
+  const [games] = useState([
+    {
+      id: 1,
+      opponent: "Hikaru",
+      result: "Win",
+      timeControl: "Blitz",
+      accuracy: 85,
+      tags: ["strong-opening", "endgame-dominance", "aggressive"],
+      date: "2025-07-05",
+    },
+    {
+      id: 2,
+      opponent: "Magnus",
+      result: "Lost",
+      timeControl: "Rapid",
+      accuracy: 72,
+      tags: ["lost-advantage", "comeback"],
+      date: "2025-07-03",
+    },
+  ]);
+
+  const [filters, setFilters] = useState({
+    timeControl: "All games",
+    color: "Both colors",
+    result: "All results",
+    dateRange: "All dates",
+    customStart: "",
+    customEnd: "",
+    customLabel: "",
+  });
+
+  const [showPopup, setShowPopup] = useState(false);
+
+  const applyFilters = () => {
+    console.log("Filters applied:", filters);
+    setShowPopup(false);
+  };
+
+  const getResultColor = (result: string) => {
+    if (result === "Win") return "#16a34a";
+    if (result === "Lost") return "#dc2626";
+    return "#e5e5e5";
+  };
+
+  const getDaysAgo = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diff = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+    return diff === 0 ? "Today" : `${diff} day${diff > 1 ? "s" : ""} ago`;
+  };
+
+  const handleDateRangeChange = (value: string) => {
+    if (value === "Custom range") {
+      setShowPopup(true);
+      setFilters({ ...filters, dateRange: value });
+    } else {
+      setShowPopup(false);
+      setFilters({ ...filters, dateRange: value, customStart: "", customEnd: "", customLabel: "" });
+    }
+  };
+
+  const confirmCustomRange = () => {
+    if (filters.customStart && filters.customEnd) {
+      const label = `Custom: ${filters.customStart} ~ ${filters.customEnd}`;
+      setFilters({
+        ...filters,
+        dateRange: label,
+        customLabel: label,
+      });
+      setShowPopup(false);
+    }
+  };
+
+  return (
+    <section
+      style={{
+        backgroundColor: "#171717",
+        color: "#e5e5e5",
+        padding: "40px 20px",
+        maxWidth: "1200px",
+        margin: "0 auto",
+        position: "relative",
+      }}
+    >
+      <h1 style={{ fontSize: "2rem", marginBottom: "20px", fontWeight: "bold", textAlign: "center" }}>
+        Your Game History
+      </h1>
+
+      {/* Filters */}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "10px",
+          marginBottom: "10px",
+          justifyContent: "center",
+        }}
+      >
+        <select
+          style={{ padding: "8px", color: "#000", backgroundColor: "#fff" }}
+          value={filters.timeControl}
+          onChange={(e) => setFilters({ ...filters, timeControl: e.target.value })}
+        >
+          <option>All games</option>
+          <option>Ultra Bullet</option>
+          <option>Bullet</option>
+          <option>Blitz</option>
+          <option>Rapid</option>
+          <option>Classic</option>
+          <option>Correspondence</option>
+        </select>
+        <select
+          style={{ padding: "8px", color: "#000", backgroundColor: "#fff" }}
+          value={filters.color}
+          onChange={(e) => setFilters({ ...filters, color: e.target.value })}
+        >
+          <option>Both colors</option>
+          <option>White</option>
+          <option>Black</option>
+        </select>
+        <select
+          style={{ padding: "8px", color: "#000", backgroundColor: "#fff" }}
+          value={filters.result}
+          onChange={(e) => setFilters({ ...filters, result: e.target.value })}
+        >
+          <option>All results</option>
+          <option>Win</option>
+          <option>Lost</option>
+          <option>Draw</option>
+        </select>
+        <select
+          style={{ padding: "8px", color: "#000", backgroundColor: "#fff" }}
+          value={filters.dateRange}
+          onChange={(e) => handleDateRangeChange(e.target.value)}
+        >
+          <option>All dates</option>
+          <option>Last 24 hours</option>
+          <option>Last 3 days</option>
+          <option>Last 7 days</option>
+          <option>Last 30 days</option>
+          <option>Last 3 months</option>
+          <option>Last 6 months</option>
+          <option>Last 365 days</option>
+          <option>Custom range</option>
+          {filters.customLabel && <option>{filters.customLabel}</option>}
+        </select>
+        <button
+          onClick={applyFilters}
+          style={{
+            padding: "8px 16px",
+            fontWeight: "bold",
+            backgroundColor: "#5b21b6",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+        >
+          Apply
+        </button>
+      </div>
+
+      {/* Popup date picker */}
+      {showPopup && (
+        <div
+          style={{
+            position: "absolute",
+            top: "180px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            backgroundColor: "#2e2e2e",
+            padding: "16px",
+            borderRadius: "8px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+            zIndex: 100,
+          }}
+        >
+          <p style={{ margin: "0 0 10px", fontWeight: "bold" }}>Select custom date range</p>
+          <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+            <input
+              type="date"
+              value={filters.customStart}
+              onChange={(e) => setFilters({ ...filters, customStart: e.target.value })}
+              style={{ padding: "6px", color: "#000", backgroundColor: "#fff" }}
+            />
+            <input
+              type="date"
+              value={filters.customEnd}
+              onChange={(e) => setFilters({ ...filters, customEnd: e.target.value })}
+              style={{ padding: "6px", color: "#000", backgroundColor: "#fff" }}
+            />
+          </div>
+          <button
+            onClick={confirmCustomRange}
+            style={{
+              padding: "6px 12px",
+              fontWeight: "bold",
+              backgroundColor: "#5b21b6",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              width: "100%",
+            }}
+          >
+            Confirm
+          </button>
+        </div>
+      )}
+
+      {/* Legend */}
+      <div style={{ textAlign: "center", marginBottom: "20px", fontSize: "0.9rem", color: "#aaa" }}>
+        ⚡ Strong Opening &nbsp;&nbsp; 😱 Lost Advantage &nbsp;&nbsp; 🏁 Endgame Dominance &nbsp;&nbsp; ⚔️ Aggressive Game &nbsp;&nbsp; 🛡️ Solid Defense &nbsp;&nbsp; ⚖️ Balanced &nbsp;&nbsp; 💪 Comeback Win
+      </div>
+
+      {/* Table */}
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <thead>
+          <tr style={{ borderBottom: "1px solid #333" }}>
+            <th style={{ padding: "8px" }}>Opponent</th>
+            <th>Result</th>
+            <th>Time</th>
+            <th>Accuracy</th>
+            <th>Tags</th>
+            <th>Played</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {games.map((game) => (
+            <tr key={game.id} style={{ borderBottom: "1px solid #333" }}>
+              <td style={{ padding: "8px" }}>{game.opponent}</td>
+              <td>
+                <div
+                  style={{
+                    backgroundColor: getResultColor(game.result),
+                    color: game.result === "Draw" ? "#000" : "#fff",
+                    padding: "2px 6px",
+                    borderRadius: "4px",
+                    fontSize: "0.75rem",
+                    textAlign: "center",
+                    minWidth: "50px",
+                  }}
+                >
+                  {game.result === "Win" ? "WON" : game.result === "Lost" ? "LOST" : "DRAW"}
+                </div>
+              </td>
+              <td style={{ textAlign: "center" }}>{game.timeControl}</td>
+              <td style={{ textAlign: "center" }}>{game.accuracy}%</td>
+              <td style={{ textAlign: "center" }}>
+                {game.tags.includes("strong-opening") && <span title="Strong Opening">⚡</span>}
+                {game.tags.includes("lost-advantage") && <span title="Lost Advantage">😱</span>}
+                {game.tags.includes("endgame-dominance") && <span title="Endgame Dominance">🏁</span>}
+                {game.tags.includes("aggressive") && <span title="Aggressive Game">⚔️</span>}
+                {game.tags.includes("solid-defense") && <span title="Solid Defense">🛡️</span>}
+                {game.tags.includes("balanced") && <span title="Balanced">⚖️</span>}
+                {game.tags.includes("comeback") && <span title="Comeback Win">💪</span>}
+              </td>
+              <td style={{ textAlign: "center" }}>{getDaysAgo(game.date)}</td>
+              <td style={{ textAlign: "center" }}>
+                <button style={{ background: "none", border: "none", cursor: "pointer", fontSize: "1.2rem" }}>
+                  🔎
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  );
+};
+
+export default FetchGamesPage;

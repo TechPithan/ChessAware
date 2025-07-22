@@ -1,0 +1,180 @@
+﻿Category,Endpoint Name,URL,Field Name,Field Description
+Player,Player Profile,https://api.chess.com/pub/player/{username},@id,Self-referencing profile URL
+Player,Player Profile,https://api.chess.com/pub/player/{username},url,Web profile URL
+Player,Player Profile,https://api.chess.com/pub/player/{username},username,Username of the player
+Player,Player Profile,https://api.chess.com/pub/player/{username},player_id,Unique Chess.com ID
+Player,Player Profile,https://api.chess.com/pub/player/{username},title,Title abbreviation (optional)
+Player,Player Profile,https://api.chess.com/pub/player/{username},status,"Account status (e.g. basic, premium, closed)"
+Player,Player Profile,https://api.chess.com/pub/player/{username},name,Full name (optional)
+Player,Player Profile,https://api.chess.com/pub/player/{username},avatar,Avatar image URL (optional)
+Player,Player Profile,https://api.chess.com/pub/player/{username},location,User location (optional)
+Player,Player Profile,https://api.chess.com/pub/player/{username},country,Country profile URL
+Player,Player Profile,https://api.chess.com/pub/player/{username},joined,Unix timestamp of account creation
+Player,Player Profile,https://api.chess.com/pub/player/{username},last_online,Unix timestamp of last login
+Player,Player Profile,https://api.chess.com/pub/player/{username},followers,Number of followers
+Player,Player Profile,https://api.chess.com/pub/player/{username},is_streamer,True if the user is a streamer
+Player,Player Profile,https://api.chess.com/pub/player/{username},twitch_url,Twitch streaming URL
+Player,Player Profile,https://api.chess.com/pub/player/{username},fide,FIDE rating
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,chess_daily.last.rating,Latest daily rating
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,chess_daily.last.date,Timestamp of last daily game
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,chess_daily.best.rating,Best daily rating achieved
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,chess_daily.best.date,Timestamp of best rating
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,chess_daily.best.game,URL of best win game
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,chess_daily.record.win,Number of daily wins
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,chess_daily.record.loss,Number of daily losses
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,chess_daily.record.draw,Number of daily draws
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,chess_daily.record.time_per_move,Average time per move in seconds
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,chess_daily.record.timeout_percent,Timeout percent in last 90 days
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,chess_daily.tournament.count,Tournaments joined
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,chess_daily.tournament.withdraw,Tournaments withdrawn
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,chess_daily.tournament.points,Tournament points
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,chess_daily.tournament.highest_finish,Best tournament finish
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,chess_blitz.last.rating,Latest blitz rating
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,chess_blitz.best.rating,Best blitz rating achieved
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,chess_blitz.record.win,Blitz wins
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,chess_blitz.record.loss,Blitz losses
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,chess_blitz.record.draw,Blitz draws
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,tactics.highest.rating,Highest tactics rating
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,tactics.highest.date,Date of highest tactics rating
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,tactics.lowest.rating,Lowest tactics rating
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,tactics.lowest.date,Date of lowest tactics rating
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,lessons.highest.rating,Highest lesson rating
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,lessons.lowest.rating,Lowest lesson rating
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,puzzle_rush.daily.total_attempts,Total daily puzzle rush attempts
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,puzzle_rush.daily.score,Score in daily puzzle rush
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,puzzle_rush.best.total_attempts,Total attempts in best run
+Player,Player Stats,https://api.chess.com/pub/player/{username}/stats,puzzle_rush.best.score,Best puzzle rush score
+Games,Current Daily Chess Games,https://api.chess.com/pub/player/{username}/games,games[].white,White player's profile URL
+Games,Current Daily Chess Games,https://api.chess.com/pub/player/{username}/games,games[].black,Black player's profile URL
+Games,Current Daily Chess Games,https://api.chess.com/pub/player/{username}/games,games[].url,Game URL
+Games,Current Daily Chess Games,https://api.chess.com/pub/player/{username}/games,games[].fen,Current position in FEN
+Games,Current Daily Chess Games,https://api.chess.com/pub/player/{username}/games,games[].pgn,Current PGN of the game
+Games,Current Daily Chess Games,https://api.chess.com/pub/player/{username}/games,games[].turn,Who's turn to move
+Games,Current Daily Chess Games,https://api.chess.com/pub/player/{username}/games,games[].move_by,Timestamp move must be played by
+Games,Current Daily Chess Games,https://api.chess.com/pub/player/{username}/games,games[].draw_offer,Draw offer status
+Games,Current Daily Chess Games,https://api.chess.com/pub/player/{username}/games,games[].last_activity,Last game activity
+Games,Current Daily Chess Games,https://api.chess.com/pub/player/{username}/games,games[].start_time,Start time of the game
+Games,Current Daily Chess Games,https://api.chess.com/pub/player/{username}/games,games[].time_control,PGN notation for time control
+Games,Current Daily Chess Games,https://api.chess.com/pub/player/{username}/games,games[].time_class,"Time classification (daily, blitz, etc.)"
+Games,Current Daily Chess Games,https://api.chess.com/pub/player/{username}/games,games[].rules,"Game rules (e.g., chess960)"
+Games,Current Daily Chess Games,https://api.chess.com/pub/player/{username}/games,games[].tournament,Tournament link (optional)
+Games,Current Daily Chess Games,https://api.chess.com/pub/player/{username}/games,games[].match,Match link (optional)
+Games,To-Move Daily Chess Games,https://api.chess.com/pub/player/{username}/games/to-move,games[].url,Game URL
+Games,To-Move Daily Chess Games,https://api.chess.com/pub/player/{username}/games/to-move,games[].move_by,Time by which to move
+Games,To-Move Daily Chess Games,https://api.chess.com/pub/player/{username}/games/to-move,games[].draw_offer,True if draw was offered
+Games,To-Move Daily Chess Games,https://api.chess.com/pub/player/{username}/games/to-move,games[].last_activity,Last activity timestamp
+Games,Monthly Archive Games,https://api.chess.com/pub/player/{username}/games/{YYYY}/{MM},games[].white.username,Username of white
+Games,Monthly Archive Games,https://api.chess.com/pub/player/{username}/games/{YYYY}/{MM},games[].white.rating,Rating after game
+Games,Monthly Archive Games,https://api.chess.com/pub/player/{username}/games/{YYYY}/{MM},games[].white.result,Game result for white
+Games,Monthly Archive Games,https://api.chess.com/pub/player/{username}/games/{YYYY}/{MM},games[].black.username,Username of black
+Games,Monthly Archive Games,https://api.chess.com/pub/player/{username}/games/{YYYY}/{MM},games[].black.rating,Rating after game
+Games,Monthly Archive Games,https://api.chess.com/pub/player/{username}/games/{YYYY}/{MM},games[].black.result,Game result for black
+Games,Monthly Archive Games,https://api.chess.com/pub/player/{username}/games/{YYYY}/{MM},games[].url,Game URL
+Games,Monthly Archive Games,https://api.chess.com/pub/player/{username}/games/{YYYY}/{MM},games[].fen,Final FEN position
+Games,Monthly Archive Games,https://api.chess.com/pub/player/{username}/games/{YYYY}/{MM},games[].pgn,Complete PGN
+Games,Monthly Archive Games,https://api.chess.com/pub/player/{username}/games/{YYYY}/{MM},games[].start_time,Start timestamp
+Games,Monthly Archive Games,https://api.chess.com/pub/player/{username}/games/{YYYY}/{MM},games[].end_time,End timestamp
+Games,Monthly Archive Games,https://api.chess.com/pub/player/{username}/games/{YYYY}/{MM},games[].time_control,PGN time control string
+Games,Monthly Archive Games,https://api.chess.com/pub/player/{username}/games/{YYYY}/{MM},games[].time_class,Time class
+Games,Monthly Archive Games,https://api.chess.com/pub/player/{username}/games/{YYYY}/{MM},games[].rules,Game rules/variant
+Games,Monthly Archive Games,https://api.chess.com/pub/player/{username}/games/{YYYY}/{MM},games[].eco,Opening ECO code
+Games,Monthly Archive Games,https://api.chess.com/pub/player/{username}/games/{YYYY}/{MM},games[].tournament,Tournament link
+Games,Monthly Archive Games,https://api.chess.com/pub/player/{username}/games/{YYYY}/{MM},games[].match,Match link
+Player,Player Clubs,https://api.chess.com/pub/player/{username}/clubs,clubs[].@id,API URL of the club
+Player,Player Clubs,https://api.chess.com/pub/player/{username}/clubs,clubs[].name,Name of the club
+Player,Player Clubs,https://api.chess.com/pub/player/{username}/clubs,clubs[].last_activity,Timestamp of last activity
+Player,Player Clubs,https://api.chess.com/pub/player/{username}/clubs,clubs[].icon,Icon image URL
+Player,Player Clubs,https://api.chess.com/pub/player/{username}/clubs,clubs[].url,Web URL of the club
+Player,Player Clubs,https://api.chess.com/pub/player/{username}/clubs,clubs[].joined,Timestamp when the player joined the club
+Club,Club Profile,https://api.chess.com/pub/club/{club_url_id},@id,Self-reference URL
+Club,Club Profile,https://api.chess.com/pub/club/{club_url_id},name,Name of the club
+Club,Club Profile,https://api.chess.com/pub/club/{club_url_id},club_id,Unique club ID
+Club,Club Profile,https://api.chess.com/pub/club/{club_url_id},url,Web URL of the club
+Club,Club Profile,https://api.chess.com/pub/club/{club_url_id},icon,Club icon URL
+Club,Club Profile,https://api.chess.com/pub/club/{club_url_id},country,Country profile URL
+Club,Club Profile,https://api.chess.com/pub/club/{club_url_id},average_daily_rating,Average daily chess rating of members
+Club,Club Profile,https://api.chess.com/pub/club/{club_url_id},members_count,Total number of members
+Club,Club Profile,https://api.chess.com/pub/club/{club_url_id},created,Timestamp of club creation
+Club,Club Profile,https://api.chess.com/pub/club/{club_url_id},last_activity,Timestamp of last activity
+Club,Club Profile,https://api.chess.com/pub/club/{club_url_id},visibility,Club visibility (public/private)
+Club,Club Profile,https://api.chess.com/pub/club/{club_url_id},join_request,If users can request to join
+Club,Club Profile,https://api.chess.com/pub/club/{club_url_id},admin,List of usernames who are admins
+Club,Club Profile,https://api.chess.com/pub/club/{club_url_id},description,Club description text
+Club,Club Members,https://api.chess.com/pub/club/{club_url_id}/members,weekly[].username,Username of weekly member
+Club,Club Members,https://api.chess.com/pub/club/{club_url_id}/members,weekly[].joined,Timestamp joined
+Club,Club Members,https://api.chess.com/pub/club/{club_url_id}/members,monthly[].username,Username of monthly member
+Club,Club Members,https://api.chess.com/pub/club/{club_url_id}/members,monthly[].joined,Timestamp joined
+Club,Club Members,https://api.chess.com/pub/club/{club_url_id}/members,all_time[].username,Username of long-time member
+Club,Club Members,https://api.chess.com/pub/club/{club_url_id}/members,all_time[].joined,Timestamp joined
+Club,Club Matches,https://api.chess.com/pub/club/{club_url_id}/matches,finished[].@id,Match API URL
+Club,Club Matches,https://api.chess.com/pub/club/{club_url_id}/matches,finished[].name,Match name
+Club,Club Matches,https://api.chess.com/pub/club/{club_url_id}/matches,finished[].url,Web URL
+Club,Club Matches,https://api.chess.com/pub/club/{club_url_id}/matches,finished[].start_time,Start timestamp
+Club,Club Matches,https://api.chess.com/pub/club/{club_url_id}/matches,finished[].end_time,End timestamp
+Club,Club Matches,https://api.chess.com/pub/club/{club_url_id}/matches,finished[].status,Match status
+Club,Club Matches,https://api.chess.com/pub/club/{club_url_id}/matches,finished[].boards,Number of boards
+Club,Club Matches,https://api.chess.com/pub/club/{club_url_id}/matches,finished[].players,Number of players
+Club,Club Matches,https://api.chess.com/pub/club/{club_url_id}/matches,finished[].result,Match result string
+Club,Club Matches,https://api.chess.com/pub/club/{club_url_id}/matches,in_progress[].@id,Ongoing match API URL
+Club,Club Matches,https://api.chess.com/pub/club/{club_url_id}/matches,in_progress[].name,Ongoing match name
+Club,Club Tournaments,https://api.chess.com/pub/club/{club_url_id}/tournaments,finished[].@id,Tournament API URL
+Club,Club Tournaments,https://api.chess.com/pub/club/{club_url_id}/tournaments,finished[].name,Tournament name
+Club,Club Tournaments,https://api.chess.com/pub/club/{club_url_id}/tournaments,finished[].url,Web tournament page
+Club,Club Tournaments,https://api.chess.com/pub/club/{club_url_id}/tournaments,in_progress[].@id,Ongoing tournament API URL
+Club,Club Tournaments,https://api.chess.com/pub/club/{club_url_id}/tournaments,in_progress[].name,Ongoing tournament name
+Matches,Player Matches,https://api.chess.com/pub/player/{username}/matches,finished[].@id,Match API URL
+Matches,Player Matches,https://api.chess.com/pub/player/{username}/matches,finished[].name,Match name
+Matches,Player Matches,https://api.chess.com/pub/player/{username}/matches,finished[].url,Match webpage
+Matches,Player Matches,https://api.chess.com/pub/player/{username}/matches,finished[].start_time,Match start time
+Matches,Player Matches,https://api.chess.com/pub/player/{username}/matches,finished[].end_time,Match end time
+Matches,Player Matches,https://api.chess.com/pub/player/{username}/matches,finished[].status,Match status
+Matches,Player Matches,https://api.chess.com/pub/player/{username}/matches,finished[].boards,Number of boards
+Matches,Player Matches,https://api.chess.com/pub/player/{username}/matches,finished[].players,Number of players
+Matches,Player Matches,https://api.chess.com/pub/player/{username}/matches,finished[].result,Result string
+Matches,Player Matches,https://api.chess.com/pub/player/{username}/matches,in_progress[].@id,Ongoing match API URL
+Matches,Player Matches,https://api.chess.com/pub/player/{username}/matches,in_progress[].name,Ongoing match name
+Tournaments,Tournaments List,https://api.chess.com/pub/player/{username}/tournaments,finished[].@id,Tournament API URL
+Tournaments,Tournaments List,https://api.chess.com/pub/player/{username}/tournaments,finished[].name,Tournament name
+Tournaments,Tournaments List,https://api.chess.com/pub/player/{username}/tournaments,in_progress[].@id,Ongoing tournament API URL
+Tournaments,Tournaments List,https://api.chess.com/pub/player/{username}/tournaments,in_progress[].name,Ongoing tournament name
+Tournaments,Tournament Details,https://api.chess.com/pub/tournament/{url_id},@id,Self-referencing URL
+Tournaments,Tournament Details,https://api.chess.com/pub/tournament/{url_id},name,Tournament name
+Tournaments,Tournament Details,https://api.chess.com/pub/tournament/{url_id},description,Tournament description
+Tournaments,Tournament Details,https://api.chess.com/pub/tournament/{url_id},url,Web URL
+Tournaments,Tournament Details,https://api.chess.com/pub/tournament/{url_id},creator,Creator username
+Tournaments,Tournament Details,https://api.chess.com/pub/tournament/{url_id},status,Tournament status
+Tournaments,Tournament Details,https://api.chess.com/pub/tournament/{url_id},finish_time,End timestamp
+Tournaments,Tournament Details,https://api.chess.com/pub/tournament/{url_id},settings.rules,Game rules
+Tournaments,Tournament Details,https://api.chess.com/pub/tournament/{url_id},settings.time_class,Time control classification
+Tournaments,Tournament Details,https://api.chess.com/pub/tournament/{url_id},settings.time_control,PGN style time control
+Tournaments,Tournament Details,https://api.chess.com/pub/tournament/{url_id},players[].username,Player username
+Tournaments,Tournament Details,https://api.chess.com/pub/tournament/{url_id},players[].status,Status of participation
+Puzzles,Random Daily Puzzle,https://api.chess.com/pub/puzzle,title,Puzzle title
+Puzzles,Random Daily Puzzle,https://api.chess.com/pub/puzzle,url,Puzzle page URL
+Puzzles,Random Daily Puzzle,https://api.chess.com/pub/puzzle,publish_time,Timestamp of publication
+Puzzles,Random Daily Puzzle,https://api.chess.com/pub/puzzle,fen,Puzzle FEN position
+Puzzles,Random Daily Puzzle,https://api.chess.com/pub/puzzle,pgn,Puzzle PGN
+Puzzles,Random Daily Puzzle,https://api.chess.com/pub/puzzle,image,Puzzle image URL
+Puzzles,Random Daily Puzzle,https://api.chess.com/pub/puzzle,solution,Array of best moves
+Countries,Country Profile,https://api.chess.com/pub/country/{ISO},@id,Self-reference API URL
+Countries,Country Profile,https://api.chess.com/pub/country/{ISO},code,Country ISO code
+Countries,Country Profile,https://api.chess.com/pub/country/{ISO},name,Country name
+Countries,Country Players,https://api.chess.com/pub/country/{ISO}/players,players[],List of usernames
+Leaderboards,Leaderboards,https://api.chess.com/pub/leaderboards,daily[].username,Username
+Leaderboards,Leaderboards,https://api.chess.com/pub/leaderboards,daily[].score,Leaderboard score
+Leaderboards,Leaderboards,https://api.chess.com/pub/leaderboards,daily[].rank,Leaderboard rank
+Leaderboards,Leaderboards,https://api.chess.com/pub/leaderboards,daily[].country,Country URL
+Leaderboards,Leaderboards,https://api.chess.com/pub/leaderboards,daily[].avatar,Avatar image
+Leaderboards,Leaderboards,https://api.chess.com/pub/leaderboards,blitz[].username,Blitz leaderboard user
+Leaderboards,Leaderboards,https://api.chess.com/pub/leaderboards,bullet[].username,Bullet leaderboard user
+Leaderboards,Leaderboards,https://api.chess.com/pub/leaderboards,rapid[].username,Rapid leaderboard user
+Leaderboards,Leaderboards,https://api.chess.com/pub/leaderboards,live960[].username,Chess960 leaderboard user
+Streamers,Streamers,https://api.chess.com/pub/streamers,streamers[].username,Streamer username
+Streamers,Streamers,https://api.chess.com/pub/streamers,streamers[].twitch_url,Twitch channel URL
+Streamers,Streamers,https://api.chess.com/pub/streamers,streamers[].url,Chess.com profile URL
+Streamers,Streamers,https://api.chess.com/pub/streamers,streamers[].is_live,True if currently live
+Streamers,Streamers,https://api.chess.com/pub/streamers,streamers[].followers,Number of followers
+Streamers,Streamers,https://api.chess.com/pub/streamers,streamers[].avatar,Profile image URL
+Streamers,Streamers,https://api.chess.com/pub/streamers,streamers[].title,Chess title
+Streamers,Streamers,https://api.chess.com/pub/streamers,streamers[].is_community_streamer,Community streamer flag
+Streamers,Streamers,https://api.chess.com/pub/streamers,streamers[].is_featured,Featured streamer flag

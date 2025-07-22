@@ -1,0 +1,462 @@
+"use client";
+import React, { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+
+const FetchGamesPage: React.FC = () => {
+  const searchParams = useSearchParams();
+  const username = searchParams.get("username");
+  const platform = searchParams.get("platform");
+
+  const [games, setGames] = useState<any[]>([]);
+  const [filteredGames, setFilteredGames] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const [filters, setFilters] = useState({
+    timeControl: "All games",
+    color: "Both colors",
+    result: "All results",
+    endedBy: "All endings",
+    dateRange: "All dates",
+    customStart: "",
+    customEnd: "",
+    customLabel: "",
+  });
+
+  const [availableTimeControls, setAvailableTimeControls] = useState<string[]>([]);
+  const [availableColors, setAvailableColors] = useState<string[]>([]);
+  const [availableResults, setAvailableResults] = useState<string[]>([]);
+  const [availableEndings, setAvailableEndings] = useState<string[]>([]);
+
+  const [showPopup, setShowPopup] = useState(false);
+
+  useEffect(() => {
+    const fetchAllGames = async () => {
+      if (!username || !platform) return;
+
+      let allGames: any[] = [];
+
+      try {
+        if (platform === "chess.com") {
+          const archivesRes = await fetch(`https://api.chess.com/pub/player/${username}/games/archives`);
+          const archivesData = await archivesRes.json();
+          const archiveUrls = archivesData.archives;
+
+          for (const url of archiveUrls) {
+            const gamesRes = await fetch(url);
+            const gamesData = await gamesRes.json();
+
+            const formatted = gamesData.games.map((g: any, idx: number) => {
+              const isWhite = g.white.username.toLowerCase() === username.toLowerCase();
+              const opponent = isWhite ? g.black.username : g.white.username;
+              const yourRating = isWhite ? g.white.rating : g.black.rating;
+              const opponentRating = isWhite ? g.black.rating : g.white.rating;
+              const playerResultRaw = isWhite ? g.white.result : g.black.result;
+              const opponentResultRaw = isWhite ? g.black.result : g.white.result;
+
+              let result = "Lost";
+              if (playerResultRaw === "win") result = "Win";
+              else if (["agreed", "stalemate", "repetition", "insufficient", "timevsinsufficient"].includes(playerResultRaw)) result = "Draw";
+
+              let endedBy = "Other";
+              if (result === "Win") {
+                if (opponentResultRaw === "checkmated") endedBy = "Checkmate";
+                else if (opponentResultRaw === "timeout") endedBy = "Timeout";
+                else if (opponentResultRaw === "resigned") endedBy = "Resignation";
+              } else if (result === "Lost") {
+                if (playerResultRaw === "checkmated") endedBy = "Checkmate";
+                else if (playerResultRaw === "timeout") endedBy = "Timeout";
+                else if (playerResultRaw === "resigned") endedBy = "Resignation";
+              } else if (result === "Draw") {
+                if (playerResultRaw === "agreed") endedBy = "Draw - Agreed";
+                else if (playerResultRaw === "stalemate") endedBy = "Draw - Stalemate";
+                else if (playerResultRaw === "repetition") endedBy = "Draw - Repetition";
+                else if (playerResultRaw === "insufficient") endedBy = "Draw - Insufficient Material";
+                else if (playerResultRaw === "timevsinsufficient") endedBy = "Draw - Time vs Insufficient";
+              }
+
+              let timeControlName = "";
+              let timeControlDetail = "";
+              if (g.time_control.includes("/")) {
+                const seconds = parseInt(g.time_control.split("/")[1]);
+                const days = Math.floor(seconds / 86400);
+                timeControlName = "Daily";
+                timeControlDetail = `${days} day${days > 1 ? "s" : ""}`;
+              } else {
+                const base = parseInt(g.time_control.split("+")[0]);
+                const increment = g.time_control.includes("+") ? parseInt(g.time_control.split("+")[1]) : 0;
+                const classifyTimeControl = (b: number) => {
+                  if (b < 60) return "Ultra Bullet";
+                  if (b < 180) return "Bullet";
+                  if (b < 600) return "Blitz";
+                  if (b < 3600) return "Rapid";
+                  return "Classic";
+                };
+                timeControlName = classifyTimeControl(base);
+                const baseTime = base < 60 ? `${base}s` : `${Math.floor(base / 60)} min`;
+                timeControlDetail = baseTime + (increment ? `|${increment}` : "");
+              }
+
+              const variant = g.rules === "chess960" ? "Chess960" : "Standard";
+
+              return {
+                id: `${url}-${idx}`,
+                opponent,
+                opponentRating: opponentRating ?? "N/A",
+                yourRating: yourRating ?? "N/A",
+                result,
+                endedBy,
+                timeControl: timeControlName,
+                timeDetail: timeControlDetail,
+                accuracy: "—",
+                tags: [],
+                date: g.end_time ? new Date(g.end_time * 1000).toISOString().split("T")[0] : "N/A",
+                color: isWhite ? "White" : "Black",
+                opponentColor: isWhite ? "Black" : "White",
+                variant,
+              };
+            });
+
+            allGames = [...allGames, ...formatted];
+          }
+        } else if (platform === "lichess") {
+          const res = await fetch(`https://lichess.org/api/games/user/${username}?max=1000&moves=false&tags=true`, {
+            headers: { Accept: "application/x-ndjson" },
+          });
+          const text = await res.text();
+          const lines = text.split("\n").filter(Boolean);
+
+          lines.forEach((line, idx) => {
+            const g = JSON.parse(line);
+
+            const isWhite = g.players.white.user && g.players.white.user.name.toLowerCase() === username.toLowerCase();
+            const opponent = isWhite ? (g.players.black.user ? g.players.black.user.name : "Anonymous") : (g.players.white.user ? g.players.white.user.name : "Anonymous");
+            const yourRating = isWhite ? g.players.white.rating : g.players.black.rating;
+            const opponentRating = isWhite ? g.players.black.rating : g.players.white.rating;
+
+            let result = "Lost";
+            if (g.winner === (isWhite ? "white" : "black")) result = "Win";
+            else if (!g.winner) result = "Draw";
+
+            let endedBy = "Other";
+            if (g.status === "mate") endedBy = "Checkmate";
+            else if (g.status === "resign") endedBy = "Resignation";
+            else if (g.status === "timeout") endedBy = "Timeout";
+            else if (g.status === "draw") endedBy = "Draw - Agreed";
+
+            let timeControlName = "";
+            if (g.speed === "ultraBullet") timeControlName = "Ultra Bullet";
+            else if (g.speed === "bullet") timeControlName = "Bullet";
+            else if (g.speed === "blitz") timeControlName = "Blitz";
+            else if (g.speed === "rapid") timeControlName = "Rapid";
+            else if (g.speed === "classical") timeControlName = "Classic";
+            else if (g.speed === "correspondence") timeControlName = "Daily";
+            else timeControlName = "Other";
+
+            const timeDetail = g.clock ? `${g.clock.initial / 60} min|${g.clock.increment}` : "";
+
+            const variant = g.variant === "chess960" ? "Chess960" : "Standard";
+
+            allGames.push({
+              id: `${g.id}-${idx}`,
+              opponent,
+              opponentRating: opponentRating ?? "N/A",
+              yourRating: yourRating ?? "N/A",
+              result,
+              endedBy,
+              timeControl: timeControlName,
+              timeDetail,
+              accuracy: "—",
+              tags: [],
+              date: g.createdAt ? new Date(g.createdAt).toISOString().split("T")[0] : "N/A",
+              color: isWhite ? "White" : "Black",
+              opponentColor: isWhite ? "Black" : "White",
+              variant,
+            });
+          });
+        }
+
+        const desiredOrder = ["Ultra Bullet", "Bullet", "Blitz", "Rapid", "Classic", "Daily"];
+        let timeControlsArray = Array.from(new Set(allGames.map((g) => g.timeControl)));
+        timeControlsArray.sort((a, b) => desiredOrder.indexOf(a) - desiredOrder.indexOf(b));
+
+        setAvailableTimeControls(["All games", ...timeControlsArray]);
+        setAvailableColors(["Both colors", ...Array.from(new Set(allGames.map((g) => g.color)))]);
+        setAvailableResults(["All results", ...Array.from(new Set(allGames.map((g) => g.result)))]);
+        setAvailableEndings(["All endings", ...Array.from(new Set(allGames.map((g) => g.endedBy)))]);
+
+        allGames.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+        setGames(allGames);
+        setFilteredGames(allGames);
+      } catch (error) {
+        console.error("Error fetching games:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllGames();
+  }, [username, platform]);
+
+  const applyFilters = () => {
+    let newGames = [...games];
+    
+    // Time control filter
+    if (filters.timeControl !== "All games") {
+      newGames = newGames.filter((g) => g.timeControl === filters.timeControl);
+    }
+    
+    // Result filter
+    if (filters.result !== "All results") {
+      newGames = newGames.filter((g) => g.result === filters.result);
+    }
+    
+    // Ended by filter
+    if (filters.endedBy !== "All endings") {
+      newGames = newGames.filter((g) => g.endedBy === filters.endedBy);
+    }
+    
+    // Color filter
+    if (filters.color !== "Both colors") {
+      newGames = newGames.filter((g) => g.color === filters.color);
+    }
+    
+    // Date range filter
+    if (filters.dateRange !== "All dates") {
+      const now = new Date();
+      let startDate = new Date();
+      
+      switch(filters.dateRange) {
+        case "Last 24 hours":
+          startDate.setDate(now.getDate() - 1);
+          break;
+        case "Last 3 days":
+          startDate.setDate(now.getDate() - 3);
+          break;
+        case "Last 7 days":
+          startDate.setDate(now.getDate() - 7);
+          break;
+        case "Last 30 days":
+          startDate.setDate(now.getDate() - 30);
+          break;
+        case "Last 3 months":
+          startDate.setMonth(now.getMonth() - 3);
+          break;
+        case "Last 6 months":
+          startDate.setMonth(now.getMonth() - 6);
+          break;
+        case "Last 365 days":
+          startDate.setFullYear(now.getFullYear() - 1);
+          break;
+        default:
+          if (filters.dateRange.startsWith("Custom:")) {
+            startDate = new Date(filters.customStart);
+            const endDate = new Date(filters.customEnd);
+            newGames = newGames.filter((g) => {
+              const gameDate = new Date(g.date);
+              return gameDate >= startDate && gameDate <= endDate;
+            });
+            break;
+          }
+          break;
+      }
+      
+      if (!filters.dateRange.startsWith("Custom:")) {
+        newGames = newGames.filter((g) => {
+          const gameDate = new Date(g.date);
+          return gameDate >= startDate && gameDate <= now;
+        });
+      }
+    }
+
+    setFilteredGames(newGames);
+    setShowPopup(false);
+  };
+
+  const resetFilters = () => {
+    setFilters({
+      timeControl: "All games",
+      color: "Both colors",
+      result: "All results",
+      endedBy: "All endings",
+      dateRange: "All dates",
+      customStart: "",
+      customEnd: "",
+      customLabel: "",
+    });
+    setFilteredGames(games);
+  };
+
+  const handleDateRangeChange = (value: string) => {
+    if (value === "Custom range") {
+      setShowPopup(true);
+      setFilters({ ...filters, dateRange: value });
+    } else {
+      setShowPopup(false);
+      setFilters({ ...filters, dateRange: value, customStart: "", customEnd: "", customLabel: "" });
+      applyFilters();
+    }
+  };
+
+  const confirmCustomRange = () => {
+    if (filters.customStart && filters.customEnd) {
+      const label = `Custom: ${filters.customStart} ~ ${filters.customEnd}`;
+      setFilters({ ...filters, dateRange: label, customLabel: label });
+      setShowPopup(false);
+      applyFilters();
+    }
+  };
+
+  const winCount = filteredGames.filter((g) => g.result === "Win").length;
+  const lostCount = filteredGames.filter((g) => g.result === "Lost").length;
+  const drawCount = filteredGames.filter((g) => g.result === "Draw").length;
+  const total = filteredGames.length || 1;
+  const winPct = ((winCount / total) * 100).toFixed(1);
+  const lostPct = ((lostCount / total) * 100).toFixed(1);
+  const drawPct = ((drawCount / total) * 100).toFixed(1);
+
+  return (
+    <section style={{ backgroundColor: "#171717", color: "#e5e5e5", padding: "40px 20px", maxWidth: "1200px", margin: "0 auto" }}>
+      <h1 style={{ fontSize: "2rem", marginBottom: "10px", fontWeight: "bold", textAlign: "center" }}>Your Game History</h1>
+
+      {username && (
+        <div style={{ textAlign: "center", marginBottom: "20px", fontSize: "1rem", color: "#ccc" }}>
+          <strong>{username}</strong> on <strong>{platform}</strong> — Total: {filteredGames.length} games | Win: {winPct}% | Lost: {lostPct}% | Draw: {drawPct}%
+        </div>
+      )}
+
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "10px", justifyContent: "center" }}>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <label style={{ fontSize: "0.8rem", marginBottom: "2px" }}>Time Control</label>
+          <select style={{ padding: "8px", color: "#000", backgroundColor: "#fff" }} value={filters.timeControl} onChange={(e) => setFilters({ ...filters, timeControl: e.target.value })}>
+            {availableTimeControls.map((tc) => <option key={tc}>{tc}</option>)}
+          </select>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <label style={{ fontSize: "0.8rem", marginBottom: "2px" }}>Color</label>
+          <select style={{ padding: "8px", color: "#000", backgroundColor: "#fff" }} value={filters.color} onChange={(e) => setFilters({ ...filters, color: e.target.value })}>
+            {availableColors.map((c) => <option key={c}>{c}</option>)}
+          </select>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <label style={{ fontSize: "0.8rem", marginBottom: "2px" }}>Result</label>
+          <select style={{ padding: "8px", color: "#000", backgroundColor: "#fff" }} value={filters.result} onChange={(e) => setFilters({ ...filters, result: e.target.value })}>
+            {availableResults.map((r) => <option key={r}>{r}</option>)}
+          </select>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <label style={{ fontSize: "0.8rem", marginBottom: "2px" }}>Ended By</label>
+          <select style={{ padding: "8px", color: "#000", backgroundColor: "#fff" }} value={filters.endedBy} onChange={(e) => setFilters({ ...filters, endedBy: e.target.value })}>
+            {availableEndings.map((eopt) => <option key={eopt}>{eopt}</option>)}
+          </select>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <label style={{ fontSize: "0.8rem", marginBottom: "2px" }}>Date Range</label>
+          <select style={{ padding: "8px", color: "#000", backgroundColor: "#fff" }} value={filters.dateRange} onChange={(e) => handleDateRangeChange(e.target.value)}>
+            <option>All dates</option>
+            <option>Last 24 hours</option>
+            <option>Last 3 days</option>
+            <option>Last 7 days</option>
+            <option>Last 30 days</option>
+            <option>Last 3 months</option>
+            <option>Last 6 months</option>
+            <option>Last 365 days</option>
+            <option>Custom range</option>
+            {filters.customLabel && <option>{filters.customLabel}</option>}
+          </select>
+        </div>
+        <button onClick={applyFilters} style={{ padding: "8px 16px", fontWeight: "bold", backgroundColor: "#5b21b6", color: "white", border: "none", borderRadius: "4px", cursor: "pointer", height: "fit-content", marginTop: "22px" }}>Apply</button>
+        <button onClick={resetFilters} style={{ padding: "8px 16px", fontWeight: "bold", backgroundColor: "#374151", color: "white", border: "none", borderRadius: "4px", cursor: "pointer", height: "fit-content", marginTop: "22px" }}>Reset</button>
+      </div>
+
+      {showPopup && (
+        <div style={{ position: "fixed", top: "0", left: "0", right: "0", bottom: "0", backgroundColor: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 }}>
+          <div style={{ backgroundColor: "#262626", padding: "20px", borderRadius: "8px", maxWidth: "400px", width: "100%" }}>
+            <h3 style={{ marginBottom: "15px", textAlign: "center" }}>Select Custom Date Range</h3>
+            <div style={{ marginBottom: "15px" }}>
+              <label style={{ display: "block", marginBottom: "5px" }}>Start Date</label>
+              <input 
+                type="date" 
+                value={filters.customStart} 
+                onChange={(e) => setFilters({ ...filters, customStart: e.target.value })}
+                style={{ width: "100%", padding: "8px", backgroundColor: "#404040", color: "white", border: "none", borderRadius: "4px" }}
+              />
+            </div>
+            <div style={{ marginBottom: "15px" }}>
+              <label style={{ display: "block", marginBottom: "5px" }}>End Date</label>
+              <input 
+                type="date" 
+                value={filters.customEnd} 
+                onChange={(e) => setFilters({ ...filters, customEnd: e.target.value })}
+                style={{ width: "100%", padding: "8px", backgroundColor: "#404040", color: "white", border: "none", borderRadius: "4px" }}
+              />
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <button 
+                onClick={() => setShowPopup(false)} 
+                style={{ padding: "8px 16px", backgroundColor: "#6b7280", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmCustomRange} 
+                style={{ padding: "8px 16px", backgroundColor: "#5b21b6", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}
+              >
+                Apply
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div style={{ textAlign: "center", marginBottom: "20px", fontSize: "0.9rem", color: "#aaa" }}>
+        ⚡ Strong Opening &nbsp;&nbsp; 😱 Lost Advantage &nbsp;&nbsp; 🏁 Endgame Dominance &nbsp;&nbsp; ⚔️ Aggressive Game &nbsp;&nbsp; 🛡️ Solid Defense &nbsp;&nbsp; ⚖️ Balanced &nbsp;&nbsp; 💪 Comeback Win
+      </div>
+
+      {loading ? (
+        <p style={{ textAlign: "center" }}>Fetching ALL games from {platform}...</p>
+      ) : filteredGames.length === 0 ? (
+        <p style={{ textAlign: "center" }}>No games found for this user.</p>
+      ) : (
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr style={{ borderBottom: "1px solid #333" }}>
+              <th style={{ padding: "8px", textAlign: "left" }}>Game</th>
+              <th>Result</th>
+              <th>Time</th>
+              <th>Accuracy</th>
+              <th>Tags</th>
+              <th>Played</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredGames.map((game) => (
+              <tr key={game.id} style={{ borderBottom: "1px solid #333" }}>
+                <td style={{ padding: "8px", textAlign: "left" }}>
+                  <span style={{ display: "inline-block", width: "10px", height: "10px", backgroundColor: game.color === "White" ? "#fff" : "#000", border: "1px solid #e5e5e5", marginRight: "4px", verticalAlign: "middle" }}></span>
+                  {`${username} (${game.yourRating}) vs `}
+                  <span style={{ display: "inline-block", width: "10px", height: "10px", backgroundColor: game.opponentColor === "White" ? "#fff" : "#000", border: "1px solid #e5e5e5", marginRight: "4px", verticalAlign: "middle" }}></span>
+                  {`${game.opponent} (${game.opponentRating})`}
+                  {game.variant !== "Standard" && (<div style={{ display: "inline-block", marginLeft: "6px", backgroundColor: "#dc2626", color: "#fff", padding: "2px 4px", borderRadius: "4px", fontSize: "0.7rem" }}>{game.variant}</div>)}
+                </td>
+                <td>
+                  <div style={{ backgroundColor: game.result === "Win" ? "#16a34a" : game.result === "Lost" ? "#dc2626" : "#e5e5e5", color: game.result === "Draw" ? "#000" : "#fff", padding: "2px 6px", borderRadius: "4px", fontSize: "0.75rem", textAlign: "center", minWidth: "50px" }}>
+                    {game.result === "Win" ? "WON" : game.result === "Lost" ? "LOST" : "DRAW"}
+                  </div>
+                </td>
+                <td style={{ textAlign: "center" }}>{game.timeControl} — {game.timeDetail}</td>
+                <td style={{ textAlign: "center" }}>{game.accuracy}</td>
+                <td style={{ textAlign: "center" }}>—</td>
+                <td style={{ textAlign: "center" }}>{(() => { const date = new Date(game.date); const now = new Date(); const diff = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)); return diff === 0 ? "Today" : `${diff} day${diff > 1 ? "s" : ""} ago`; })()}</td>
+                <td style={{ textAlign: "center" }}><button style={{ background: "none", border: "none", cursor: "pointer", fontSize: "1.2rem" }}>🔎</button></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </section>
+  );
+};
+
+export default FetchGamesPage;
