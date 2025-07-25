@@ -354,14 +354,14 @@ const FetchGamesPage: React.FC = () => {
                 };
                 // Before inserting, check for duplicate
                 const { data: existingGame } = await supabase
-                  .from('games')
-                  .select('id')
+                  .from('lichess_games') // Changed table name for Lichess
+                  .select('game_id')
                   .eq('game_id', gameObj.id)
                   .eq('username', username)
                   .eq('platform', platform)
                   .maybeSingle();
                 if (!existingGame) {
-                  const { error } = await supabase.from('games').insert([
+                  const { error } = await supabase.from('lichess_games').insert([ // Changed table name for Lichess
                     {
                       username,
                       platform,
@@ -420,6 +420,64 @@ const FetchGamesPage: React.FC = () => {
 
     fetchAllGames();
   }, [username, platform]);
+
+  // Polling for analysis completion
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    async function pollAnalysis() {
+      if (!username || !platform) return;
+      setAnalysisLoading(true);
+      
+      let gamesData: any[] = [];
+      let error: any = null;
+      
+      // Query the correct table based on platform
+      if (platform === 'chess.com') {
+        const { data, error: queryError } = await supabase
+          .from('games')
+          .select('id,accuracies,analysis,username,platform')
+          .eq('username', username)
+          .eq('platform', platform);
+        gamesData = data || [];
+        error = queryError;
+      } else if (platform === 'lichess') {
+        const { data, error: queryError } = await supabase
+          .from('lichess_games')
+          .select('game_id,accuracies,analysis,username,platform')
+          .eq('username', username)
+          .eq('platform', platform);
+        gamesData = data || [];
+        error = queryError;
+      }
+      
+      console.log('Polling analysis:', { username, platform, count: gamesData.length, gamesData });
+      if (error) {
+        setError('Error checking analysis progress');
+        setAnalysisLoading(false);
+        return;
+      }
+      const total = gamesData.length;
+      const analyzed = gamesData.filter(g => g.accuracies !== null && g.analysis !== null).length;
+      setAnalysisProgress({ analyzed, total });
+      if (analyzed === total && total > 0) {
+        setAnalysisLoading(false);
+        setLoading(false);
+        if (interval) clearInterval(interval);
+      } else {
+        setAnalysisLoading(true);
+      }
+    }
+    if (username && platform) {
+      pollAnalysis();
+      interval = setInterval(pollAnalysis, 10000); // poll every 10s
+    }
+    return () => { if (interval) clearInterval(interval); };
+  }, [username, platform]);
+
+  // When loading is done, reset progress
+  useEffect(() => {
+    if (!loading) setProgress({ current: 0, total: 0 });
+  }, [loading]);
 
   const applyFilters = () => {
     let newGames = [...games];
@@ -657,7 +715,7 @@ const FetchGamesPage: React.FC = () => {
             value={filters.timeControl} 
             onChange={(e) => setFilters({ ...filters, timeControl: e.target.value })}
           >
-            {availableTimeControls.map((tc) => <option key={tc}>{tc}</option>)}
+            {availableTimeControls.map((tc, index) => <option key={`tc-${index}`}>{tc}</option>)}
           </select>
         </div>
         <div style={{ display: "flex", flexDirection: "column", minWidth: 160 }}>
@@ -667,7 +725,7 @@ const FetchGamesPage: React.FC = () => {
             value={filters.color} 
             onChange={(e) => setFilters({ ...filters, color: e.target.value })}
           >
-            {availableColors.map((c) => <option key={c}>{c}</option>)}
+            {availableColors.map((c, index) => <option key={`c-${index}`}>{c}</option>)}
           </select>
         </div>
         <div style={{ display: "flex", flexDirection: "column", minWidth: 160 }}>
@@ -677,7 +735,7 @@ const FetchGamesPage: React.FC = () => {
             value={filters.result} 
             onChange={(e) => setFilters({ ...filters, result: e.target.value })}
           >
-            {availableResults.map((r) => <option key={r}>{r}</option>)}
+            {availableResults.map((r, index) => <option key={`r-${index}`}>{r}</option>)}
           </select>
         </div>
         <div style={{ display: "flex", flexDirection: "column", minWidth: 160 }}>
@@ -687,7 +745,7 @@ const FetchGamesPage: React.FC = () => {
             value={filters.endedBy} 
             onChange={(e) => setFilters({ ...filters, endedBy: e.target.value })}
           >
-            {availableEndings.map((eopt) => <option key={eopt}>{eopt}</option>)}
+            {availableEndings.map((eopt, index) => <option key={`e-${index}`}>{eopt}</option>)}
           </select>
         </div>
         <div style={{ display: "flex", flexDirection: "column", minWidth: 220, flex: 1 }}>
@@ -697,7 +755,7 @@ const FetchGamesPage: React.FC = () => {
             value={filters.opening}
             onChange={(e) => setFilters({ ...filters, opening: e.target.value })}
           >
-            {availableOpenings.map((o) => <option key={o}>{o}</option>)}
+            {availableOpenings.map((o, index) => <option key={`o-${index}`}>{o}</option>)}
           </select>
         </div>
         <div style={{ display: "flex", flexDirection: "column", minWidth: 180 }}>
