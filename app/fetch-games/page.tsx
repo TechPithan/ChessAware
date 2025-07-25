@@ -354,14 +354,14 @@ const FetchGamesPage: React.FC = () => {
                 };
                 // Before inserting, check for duplicate
                 const { data: existingGame } = await supabase
-                  .from('games')
-                  .select('id')
+                  .from('lichess_games')
+                  .select('game_id')
                   .eq('game_id', gameObj.id)
                   .eq('username', username)
                   .eq('platform', platform)
                   .maybeSingle();
                 if (!existingGame) {
-                  const { error } = await supabase.from('games').insert([
+                  const { error } = await supabase.from('lichess_games').insert([
                     {
                       username,
                       platform,
